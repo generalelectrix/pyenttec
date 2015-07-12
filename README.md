@@ -14,6 +14,11 @@ port.dmx_frame[0] = 123
 port.render()
 ```
 
+On windows or linux, the select_port function can be modified.  Windows uses
+numbered com ports, and on linux your serial port directory and port name will
+probably be different.  You can also just call the DMXConnection constructor
+directly with the right argument.
+
 Support is included for setting various port parameters such as refresh rate
 and universe length.  For certain applications (very fast strobe control,
 for exmaple) using a truncated universe with refresh_rate = 0 permits faster
