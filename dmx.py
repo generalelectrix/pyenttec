@@ -161,6 +161,18 @@ class DMXConnection(object):
 
         self.com.write(self._packet_start + ''.join(dmx_payload) + PACKET_END)
 
+    def set_channel(self, chan, val):
+        """Set the value of a DMX channel, indexed from 0.
+
+        Raises DMXAddressError for out of bounds address.
+        """
+        try:
+            self.dmx_frame[chan] = val
+        except IndexError:
+            raise DMXAddressError("Channel index {} out of range. "
+                                  "Universe size is {}."
+                                  .format(chan, len(self.dmx_frame)))
+
     def blackout(self):
         """Zero all DMX values."""
         self.dmx_frame = [0] * len(self.dmx_frame)
@@ -175,4 +187,7 @@ class EnttecPortOpenError(Exception):
     pass
 
 class EnttecConfigError(Exception):
+    pass
+
+class DMXAddressError(Exception):
     pass
