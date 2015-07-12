@@ -8,7 +8,7 @@ is expected to supply proper values.
 
 On OS X, use is very simple using the select_port function:
 ```python
-from pyenttec import dmx
+import pyenttec as dmx
 port = dmx.select_port()
 port.dmx_frame[0] = 123
 port.render()

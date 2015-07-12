@@ -1,5 +1,5 @@
 from setuptools import setup
-with open(README.md) as f:
+with open('README.md') as f:
     readme = f.read()
 setup(name='pyenttec',
       version='1.0',
@@ -8,4 +8,4 @@ setup(name='pyenttec',
       license='GPL3',
       description='Control an Enttec Pro DMX from python.',
       long_description=readme,
-      py_modules=['enttec_dmx'])
+      py_modules=['pyenttec'])
