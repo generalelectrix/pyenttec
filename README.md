@@ -9,6 +9,7 @@ to massage out of range inputs (such as DMX values greater than 255).  The clien
 is expected to supply proper values.
 
 On OS X, use is very simple using the select_port function:
+
     import pyenttec as dmx
     port = dmx.select_port()
     port.dmx_frame[0] = 123
