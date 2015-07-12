@@ -1,18 +1,18 @@
 # pyenttec
 Python module for sending DMX using the Enttec Pro (or compatible) DMX port.
 
+Install using setuptools.  I'll get this on PyPI at some point.
+
 In general, this interface attempts to be as pythonic as possible.  Since rendering
 DMX is a real-time operation, the interface is lightweight and does not attempt
 to massage out of range inputs (such as DMX values greater than 255).  The client
 is expected to supply proper values.
 
 On OS X, use is very simple using the select_port function:
-```python
-import pyenttec as dmx
-port = dmx.select_port()
-port.dmx_frame[0] = 123
-port.render()
-```
+    import pyenttec as dmx
+    port = dmx.select_port()
+    port.dmx_frame[0] = 123
+    port.render()
 
 On windows or linux, the select_port function can be modified.  Windows uses
 numbered com ports, and on linux your serial port directory and port name will
