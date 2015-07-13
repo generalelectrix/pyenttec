@@ -136,7 +136,6 @@ class DMXConnection(object):
         univ_size = len(self.dmx_frame)
 
         # need to add a pad byte to the serial packet before the DMX payload
-        # I believe this corresponds to the DMX break?  Maybe?
         packet_start = [START_VAL,
                         PortActions.SendDMXPacket,
                         (univ_size + 1) & 0xFF,
