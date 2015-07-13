@@ -124,6 +124,10 @@ class DMXConnection(object):
                 512 channels.  The enttec can go faster with truncated universes,
                 interesting for special-purpose control such as fast response time
                 for strobe control.
+
+        Raises:
+            EnttecConfigError if the universe size is out of bounds.
+            EnttecPortOpenError if there was an error opening the port.
         """
         if univ_size > _MAX_DMX_SIZE:
             raise EnttecConfigError("Illegal universe size {}; max is {}."
