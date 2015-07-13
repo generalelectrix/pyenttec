@@ -3,33 +3,51 @@ from __future__ import print_function
 import serial, sys
 import os
 
-START_VAL = 0x7E
-END_VAL = 0xE7
+_START_VAL = 0x7E
+_END_VAL = 0xE7
 
-COM_BAUD = 57600
-COM_TIMEOUT = 1
-COM_PORT = 7
-MIN_DMX_SIZE = 24
-MAX_DMX_SIZE = 512
+_COM_BAUD = 57600
+_COM_TIMEOUT = 1
+_MIN_DMX_SIZE = 24
+_MAX_DMX_SIZE = 512
 
-PACKET_END = chr(END_VAL)
+_PACKET_END = chr(_END_VAL)
 
-def select_port(auto=True, platform='OSX'):
+_port_basenames = {'darwin': ["tty.usbserial"],}
+
+def _item_is_port(item, platform):
+    basenames = _port_basenames[platform]
+    for name in basenames:
+        if name in item:
+            return True
+    return False
+
+def available_ports():
+    """Get a list of available port names."""
+    platform = sys.platform
+    if platform not in _port_basenames.iterkeys():
+        raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
+                                  "selection only supports {}."
+                                  .format(platform, _port_basenames.keys()))
+    return [item for item in os.listdir('/dev/') if _item_is_port(item, platform)]
+
+
+def select_port(auto=True):
     """List the available Enttec ports, with auto selection options.
 
     This function currently only supports Mac OS X and may require further
     customization for your system.
     """
-    if platform != 'OSX':
-        raise EnttecPortOpenError("The select_port function only supports the platform 'OSX'.")
+    platform = sys.platform
+    if platform not in _port_basenames.iterkeys():
+        raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
+                                  "selection only supports {}."
+                                  .format(platform, _port_basenames.keys()))
     print("Available enttec ports:")
-    ports = []
-    n_port = 0
-    for item in os.listdir('/dev/'):
-        if "tty.usbserial" in item:
-            print("{}: {}".format(n_port, item))
-            n_port += 1
-            ports.append(item)
+    ports = available_ports()
+    for i, port in enumerate(ports):
+        print("{}: {}".format(i, port))
+
     # select an enttec:
     if len(ports) == 0:
         raise EnttecPortOpenError("No enttec ports found.")
@@ -69,18 +87,18 @@ class EnttecProParams(object):
                    self._mark_after_break_time,
                    self.refresh_rate]
         length = len(payload)
-        packet = [START_VAL,
+        packet = [_START_VAL,
                   PortActions.SetParameters,
                   length & 0xFF,
                   (length >> 8) & 0xFF]
         packet += payload
-        packet.append(END_VAL)
+        packet.append(_END_VAL)
         return ''.join(chr(val) for val in packet)
 
 
 
 class DMXConnection(object):
-    def __init__(self, com_port = None, univ_size = MAX_DMX_SIZE):
+    def __init__(self, com_port = None, univ_size = _MAX_DMX_SIZE):
         """Initialize a new enttec port.
 
         Args:
@@ -95,19 +113,19 @@ class DMXConnection(object):
                 interesting for special-purpose control such as fast response time
                 for strobe control.
         """
-        if univ_size > MAX_DMX_SIZE:
+        if univ_size > _MAX_DMX_SIZE:
             raise EnttecConfigError("Illegal universe size {}; max is {}."
-                                    .format(univ_size, MAX_DMX_SIZE))
-        if univ_size < MIN_DMX_SIZE:
+                                    .format(univ_size, _MAX_DMX_SIZE))
+        if univ_size < _MIN_DMX_SIZE:
             raise EnttecConfigError("Illegal universe size {}; min is {}."
-                                    .format(univ_size, MIN_DMX_SIZE))
+                                    .format(univ_size, _MIN_DMX_SIZE))
 
         self._port_params = EnttecProParams()
         self.dmx_frame = [0] * univ_size
         self._com_port = com_port
 
         try:
-            self.com = serial.Serial(com_port, baudrate = COM_BAUD, timeout = COM_TIMEOUT)
+            self.com = serial.Serial(com_port, baudrate = _COM_BAUD, timeout = _COM_TIMEOUT)
         except Exception:
             raise EnttecPortOpenError("Could not open an enttec port at {}".format(com_port))
 
@@ -136,7 +154,7 @@ class DMXConnection(object):
         univ_size = len(self.dmx_frame)
 
         # need to add a pad byte to the serial packet before the DMX payload
-        packet_start = [START_VAL,
+        packet_start = [_START_VAL,
                         PortActions.SendDMXPacket,
                         (univ_size + 1) & 0xFF,
                         ( (univ_size + 1) >> 8) & 0xFF,
@@ -154,7 +172,7 @@ class DMXConnection(object):
 
         dmx_payload = (chr(v) for v in self.dmx_frame)
 
-        self.com.write(self._packet_start + ''.join(dmx_payload) + PACKET_END)
+        self.com.write(self._packet_start + ''.join(dmx_payload) + _PACKET_END)
 
     def set_channel(self, chan, val):
         """Set the value of a DMX channel, indexed from 0.
