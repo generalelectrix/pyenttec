@@ -13,6 +13,7 @@ _MAX_DMX_SIZE = 512
 
 _PACKET_END = chr(_END_VAL)
 
+_port_directory = {'darwin': "/dev/",}
 _port_basenames = {'darwin': ["tty.usbserial"],}
 
 def _item_is_port(item, platform):
@@ -29,7 +30,11 @@ def available_ports():
         raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
                                   "selection only supports {}."
                                   .format(platform, _port_basenames.keys()))
-    return [item for item in os.listdir('/dev/') if _item_is_port(item, platform)]
+    return _available_ports(platform)
+
+def _available_ports(platform):
+    return [item for item in os.listdir(_port_directory[platform])
+            if _item_is_port(item, platform)]
 
 
 def select_port(auto=True):
@@ -44,7 +49,7 @@ def select_port(auto=True):
                                   "selection only supports {}."
                                   .format(platform, _port_basenames.keys()))
     print("Available enttec ports:")
-    ports = available_ports()
+    ports = _available_ports(platform)
     for i, port in enumerate(ports):
         print("{}: {}".format(i, port))
 
@@ -60,7 +65,7 @@ def select_port(auto=True):
     except IndexError:
         raise EnttecPortOpenError("Invalid port selection.")
 
-    return DMXConnection('/dev/' + port_name)
+    return DMXConnection(_port_directory[platform] + port_name)
 
 class PortActions(object):
     """Not the complete set, and GetParameters and ReceiveDMXPacket are unused."""
