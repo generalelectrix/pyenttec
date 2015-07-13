@@ -24,7 +24,11 @@ def _item_is_port(item, platform):
     return False
 
 def available_ports():
-    """Get a list of available port names."""
+    """Get a list of available port names.
+
+    This function currently only supports Mac OS X and may require further
+    customization for your system.
+    """
     platform = sys.platform
     if platform not in _port_basenames.iterkeys():
         raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
@@ -38,7 +42,10 @@ def _available_ports(platform):
 
 
 def select_port(auto=True):
-    """List the available Enttec ports, with auto selection options.
+    """List the available Enttec ports, with auto selection option.
+
+    If auto=True (default), port is automatically selected if there is only one
+    available.
 
     This function currently only supports Mac OS X and may require further
     customization for your system.
