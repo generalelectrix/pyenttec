@@ -15,7 +15,7 @@ On OS X, use is very simple using the select_port function:
     port.dmx_frame[0] = 123
     port.render()
 
-On windows or linux, the select_port function can be modified.  Windows uses
+On windows or linux, the select_port function must be modified before use.  Windows uses
 numbered com ports, and on linux your serial port directory and port name will
 probably be different.  You can also just call the DMXConnection constructor
 directly with the right argument.
