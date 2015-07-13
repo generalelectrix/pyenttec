@@ -51,10 +51,6 @@ class PortActions(object):
     ReceiveDMXPacket = 5
     SendDMXPacket = 6
 
-def clamp(value, min_val, max_val):
-    """Ensure a numeric value falls inside a given range."""
-    return max(min_val, min(value, max_val))
-
 class EnttecProParams(object):
     """Envelope to hold the state of an enttec port."""
     def __init__(self):
