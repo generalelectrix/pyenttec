@@ -62,6 +62,9 @@ def select_port(auto=True):
 
     # select an enttec:
     if len(ports) == 0:
+        selection = raw_input("No enttec ports found; enter y to use a mock.")
+        if selection == 'y':
+            return DMXConnectionOffline('offline port')
         raise EnttecPortOpenError("No enttec ports found.")
     elif len(ports) == 1 and auto:
         selection = 0
@@ -108,9 +111,8 @@ class EnttecProParams(object):
         return ''.join(chr(val) for val in packet)
 
 
-
 class DMXConnection(object):
-    def __init__(self, com_port = None, univ_size = _MAX_DMX_SIZE):
+    def __init__(self, com_port=None, univ_size=_MAX_DMX_SIZE):
         """Initialize a new enttec port.
 
         Args:
@@ -140,12 +142,18 @@ class DMXConnection(object):
         self.dmx_frame = [0] * univ_size
         self._com_port = com_port
 
-        try:
-            self.com = serial.Serial(com_port, baudrate = _COM_BAUD, timeout = _COM_TIMEOUT)
-        except Exception:
-            raise EnttecPortOpenError("Could not open an enttec port at {}".format(com_port))
+        self.com = None
+        self._open_port()
 
         self._update_params()
+
+    def _open_port(self):
+        try:
+            self.com = serial.Serial(
+                self._com_port, baudrate=_COM_BAUD, timeout=_COM_TIMEOUT)
+        except Exception:
+            raise EnttecPortOpenError(
+                "Could not open an enttec port at {}".format(self._com_port))
 
     def __str__(self):
         return "DMXConnection on port '{}'".format(self._com_port)
@@ -209,6 +217,35 @@ class DMXConnection(object):
     def close(self):
         """Close the port manually."""
         self.com.close()
+
+
+class DMXConnectionOffline(DMXConnection):
+    """Placeholder mock for when a real port is not available."""
+    def _open_port(self):
+        pass
+
+    def _update_params(self):
+        """Recompute all of the port parameters and update the port settings."""
+        univ_size = len(self.dmx_frame)
+
+        # need to add a pad byte to the serial packet before the DMX payload
+        packet_start = [_START_VAL,
+                        PortActions.SendDMXPacket,
+                        (univ_size + 1) & 0xFF,
+                        ( (univ_size + 1) >> 8) & 0xFF,
+                        0]
+        self._packet_start = ''.join(chr(v) for v in packet_start)
+
+        self._write_settings()
+
+    def _write_settings(self):
+        pass
+
+    def render(self):
+        pass
+
+    def close(self):
+        pass
 
 
 # --- Error handling ---
