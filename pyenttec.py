@@ -62,7 +62,7 @@ def select_port(auto=True):
 
     # select an enttec:
     if len(ports) == 0:
-        selection = raw_input("No enttec ports found; enter y to use a mock.")
+        selection = raw_input("No enttec ports found; enter y to use a mock: ")
         if selection == 'y':
             return DMXConnectionOffline('offline port')
         raise EnttecPortOpenError("No enttec ports found.")
