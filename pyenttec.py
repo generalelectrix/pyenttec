@@ -213,6 +213,17 @@ class DMXConnection(object):
                                   "DMX uses 8bit unsigned values (0-255)."
                                   .format(chan, len(self.dmx_frame)))
 
+    def __setitem__(self, chan, val):
+        self.set_channel(chan, val)
+
+    def __getitem__(self, chan):
+        try:
+            return self.dmx_frame[chan]
+        except IndexError:
+            raise DMXAddressError("Channel index {} out of range. "
+                                  "Universe size is {}."
+                                  .format(chan, len(self.dmx_frame)))
+
     def blackout(self):
         """Zero all DMX values."""
         self.dmx_frame = array('B', b'\x00' * len(self.dmx_frame))
