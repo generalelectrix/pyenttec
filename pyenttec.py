@@ -4,6 +4,10 @@ import serial, sys
 import os
 from array import array
 
+PY2 = sys.version_info[0] == 2
+if PY2:
+    input = raw_input
+
 _START_VAL = 0x7E
 _END_VAL = 0xE7
 
@@ -63,14 +67,14 @@ def select_port(auto=True):
 
     # select an enttec:
     if len(ports) == 0:
-        selection = raw_input("No enttec ports found; enter y to use a mock: ")
+        selection = input("No enttec ports found; enter y to use a mock: ")
         if selection == 'y':
             return DMXConnectionOffline('offline port')
         raise EnttecPortOpenError("No enttec ports found.")
     elif len(ports) == 1 and auto:
         selection = 0
     else:
-        selection = int(raw_input("Select a port by number:"))
+        selection = int(input("Select a port by number:"))
     try:
         port_name = ports[selection]
     except IndexError:
