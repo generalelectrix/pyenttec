@@ -3,6 +3,7 @@ from __future__ import print_function
 import serial, sys
 import os
 from array import array
+import struct
 
 PY2 = sys.version_info[0] == 2
 if PY2:
@@ -16,7 +17,7 @@ _COM_TIMEOUT = 1
 _MIN_DMX_SIZE = 24
 _MAX_DMX_SIZE = 512
 
-_PACKET_END = _END_VAL.to_bytes(1, 'big')
+_PACKET_END = struct.pack('>B', _END_VAL)
 
 _port_directory = {'darwin': "/dev/",}
 _port_basenames = {'darwin': ["tty.usbserial"],}
