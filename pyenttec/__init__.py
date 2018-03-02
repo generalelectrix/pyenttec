@@ -242,20 +242,6 @@ class DMXConnectionOffline(DMXConnection):
     def _open_port(self):
         pass
 
-    def _update_params(self):
-        """Recompute all of the port parameters and update the port settings."""
-        univ_size = len(self.dmx_frame)
-
-        # need to add a pad byte to the serial packet before the DMX payload
-        packet_start = [_START_VAL,
-                        PortActions.SendDMXPacket,
-                        (univ_size + 1) & 0xFF,
-                        ( (univ_size + 1) >> 8) & 0xFF,
-                        0]
-        self._packet_start = array('B', packet_start).tostring()
-
-        self._write_settings()
-
     def _write_settings(self):
         pass
 
