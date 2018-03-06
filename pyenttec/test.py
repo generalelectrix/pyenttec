@@ -14,8 +14,10 @@ def test_offline_port():
 
     port.set_channel(0, 1)
     assert_equal(1, port.dmx_frame[0])
+    assert_equal(1, port[0])
 
     assert_raises(DMXAddressError, port.set_channel, univ_size, 0)
+    assert_raises(DMXAddressError, lambda c, v: port[c] = v, univ_size, 0)
 
 def test_dmx_value_range():
     port = get_test_port()
