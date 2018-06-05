@@ -2,12 +2,9 @@
 from nose.tools import assert_equal, assert_raises, raises
 from . import DMXConnectionOffline
 
-def get_test_port(univ_size=24):
-    return DMXConnectionOffline(univ_size=univ_size)
-
 def test_offline_port():
     univ_size = 24
-    port = get_test_port(univ_size)
+    port = DMXConnectionOffline(univ_size=univ_size)
 
     assert_equal(univ_size, len(port.dmx_frame))
     assert all(chan == 0 for chan in port.dmx_frame)
@@ -19,7 +16,7 @@ def test_offline_port():
 
 def test_port_item_accessors():
     univ_size = 24
-    port = get_test_port(univ_size)
+    port = DMXConnectionOffline(univ_size=univ_size)
     port[univ_size - 1] = 2
     assert_equal(2, port.dmx_frame[univ_size - 1])
     port[0] = 2
@@ -28,21 +25,21 @@ def test_port_item_accessors():
 @raises(IndexError)
 def test_port_setitem_max_address():
     univ_size = 24
-    port = get_test_port(univ_size)
+    port = DMXConnectionOffline(univ_size=univ_size)
     port[univ_size] = 2
 
 def test_dmx_value_range():
-    port = get_test_port()
+    univ_size = 24
+    port = DMXConnectionOffline(univ_size=univ_size)
 
     assert_raises(OverflowError, port.set_channel, 1, -1)
 
-    port.set_channel(0, 0)
-    assert_equal(0, port.dmx_frame[0])
+    def set_and_check(chan, val):
+        port.set_channel(chan, val)
+        assert_equal(val, port[chan])
 
-    port.set_channel(0, 128)
-    assert_equal(128, port.dmx_frame[0])
-
-    port.set_channel(0, 255)
-    assert_equal(255, port.dmx_frame[0])
+    set_and_check(0, 0)
+    set_and_check(0, 128)
+    set_and_check(0, 255)
 
     assert_raises(OverflowError, port.set_channel, 5, 256)
