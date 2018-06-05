@@ -17,16 +17,22 @@ def test_offline_port():
 def test_port_item_accessors():
     univ_size = 24
     port = DMXConnectionOffline(univ_size=univ_size)
-    port[univ_size - 1] = 2
-    assert_equal(2, port.dmx_frame[univ_size - 1])
-    port[0] = 2
-    assert_equal(2, port.dmx_frame[0])
 
-@raises(IndexError)
+    for i in range(univ_size):
+        port[i] = i
+        assert_equal(i, port.dmx_frame[i])
+        assert_equal(i, port[i])
+
 def test_port_setitem_max_address():
     univ_size = 24
     port = DMXConnectionOffline(univ_size=univ_size)
-    port[univ_size] = 2
+
+    def assert_fail_set_index(i):
+        with assert_raises(IndexError):
+            port[i] = 0
+    # assert_fail_set_index(-1)
+    assert_fail_set_index(univ_size)
+    assert_fail_set_index(univ_size + 1)
 
 def test_dmx_value_range():
     univ_size = 24
