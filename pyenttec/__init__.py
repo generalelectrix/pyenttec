@@ -205,28 +205,16 @@ class DMXConnection(object):
     def set_channel(self, chan, val):
         """Set the value of a DMX channel, indexed from 0.
 
-        Raises DMXAddressError for out of bounds address.
+        Raises IndexError for out of bounds address.
+
+        Raises OverflowError for out of bounds value.
         """
-        try:
-            self.dmx_frame[chan] = val
-        except IndexError:
-            raise DMXAddressError("Channel index {} out of range. "
-                                  "Universe size is {}."
-                                  .format(chan, len(self.dmx_frame)))
-        except OverflowError:
-            raise DMXOverflowError("Channel value {} out of range. "
-                                  "DMX uses 8bit unsigned values (0-255)."
-                                  .format(chan))
+        self.dmx_frame[chan] = val
 
     __setitem__ = set_channel
 
     def __getitem__(self, chan):
-        try:
-            return self.dmx_frame[chan]
-        except IndexError:
-            raise DMXAddressError("Channel index {} out of range. "
-                                  "Universe size is {}."
-                                  .format(chan, len(self.dmx_frame)))
+        return self.dmx_frame[chan]
 
     def blackout(self):
         """Zero all DMX values."""
@@ -260,13 +248,4 @@ class EnttecPortOpenError(EnttecError):
     pass
 
 class EnttecConfigError(EnttecError):
-    pass
-
-class DMXError(Exception):
-    pass
-
-class DMXAddressError(DMXError):
-    pass
-
-class DMXOverflowError(DMXError):
     pass
