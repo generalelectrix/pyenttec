@@ -216,10 +216,9 @@ class DMXConnection(object):
         except OverflowError:
             raise DMXOverflowError("Channel value {} out of range. "
                                   "DMX uses 8bit unsigned values (0-255)."
-                                  .format(chan, len(self.dmx_frame)))
+                                  .format(chan))
 
-    def __setitem__(self, chan, val):
-        self.set_channel(chan, val)
+    __setitem__ = set_channel
 
     def __getitem__(self, chan):
         try:
