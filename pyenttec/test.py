@@ -38,7 +38,7 @@ def test_dmx_value_range():
     univ_size = 24
     port = DMXConnectionOffline(univ_size=univ_size)
 
-    assert_raises(OverflowError, port.set_channel, 1, -1)
+    assert_raises(ValueError, port.set_channel, 1, -1)
 
     def set_and_check(chan, val):
         port.set_channel(chan, val)
@@ -48,4 +48,4 @@ def test_dmx_value_range():
     set_and_check(0, 128)
     set_and_check(0, 255)
 
-    assert_raises(OverflowError, port.set_channel, 5, 256)
+    assert_raises(ValueError, port.set_channel, 5, 256)

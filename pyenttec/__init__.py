@@ -206,9 +206,14 @@ class DMXConnection(object):
 
         Raises IndexError for out of bounds address.
 
-        Raises OverflowError for out of bounds value.
+        Raises ValueError for out of bounds value.
         """
-        self.dmx_frame[chan] = val
+        try:
+            self.dmx_frame[chan] = val
+        except OverflowError:
+            raise ValueError("Channel value {} out of range. " 
+                             "DMX uses 8bit unsigned values (0-255)." 
+                             .format(chan))
 
     __setitem__ = set_channel
 
