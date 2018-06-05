@@ -102,19 +102,18 @@ class EnttecProParams(object):
 
     def to_packet(self):
         """Format these parameters into a serial packet to send to the port."""
-        payload = [self._user_size_lsb,
+        payload = (self._user_size_lsb,
                    self._user_size_msb,
                    self._break_time,
                    self._mark_after_break_time,
-                   self.refresh_rate]
+                   self.refresh_rate)
         length = len(payload)
-        packet = [_START_VAL,
+        header = (_START_VAL,
                   PortActions.SetParameters,
                   length & 0xFF,
-                  (length >> 8) & 0xFF]
-        packet += payload
-        packet.append(_END_VAL)
-        return array('B', packet).tostring()
+                  (length >> 8) & 0xFF)
+        packet = header + payload
+        return array('B', packet).tostring() + _PACKET_END
 
 
 class DMXConnection(object):
@@ -184,18 +183,18 @@ class DMXConnection(object):
         univ_size = len(self.dmx_frame)
 
         # need to add a pad byte to the serial packet before the DMX payload
-        packet_start = [_START_VAL,
+        packet_start = (_START_VAL,
                         PortActions.SendDMXPacket,
                         (univ_size + 1) & 0xFF,
                         ( (univ_size + 1) >> 8) & 0xFF,
-                        0]
+                        0)
         self._packet_start = array('B', packet_start).tostring()
 
         self._write_settings()
 
     def _write_settings(self):
         """Write the current settings to the port."""
-        self.com.write(self._port_params.to_packet() + _PACKET_END)
+        self.com.write(self._port_params.to_packet())
 
     def render(self):
         """Write the current DMX frame to the port."""
