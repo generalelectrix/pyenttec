@@ -1,5 +1,5 @@
 """Tests for offline DMX port."""
-from nose.tools import assert_equal, assert_raises, raises
+from nose.tools import assert_equal, assert_is, assert_raises, raises
 from . import DMXConnectionOffline
 
 def test_offline_port():
@@ -49,3 +49,12 @@ def test_dmx_value_range():
     set_and_check(0, 255)
 
     assert_raises(ValueError, port.set_channel, 5, 256)
+
+def test_blackout_keeps_array():
+    univ_size = 24
+    port = DMXConnectionOffline(univ_size=univ_size)
+
+    old_frame = port.dmx_frame
+    port.blackout()
+    assert_is(port.dmx_frame, old_frame)
+

@@ -222,7 +222,7 @@ class DMXConnection(object):
 
     def blackout(self):
         """Zero all DMX values."""
-        self.dmx_frame = array('B', b'\x00' * len(self.dmx_frame))
+        self.dmx_frame[:] = array('B', b'\x00' * len(self.dmx_frame))
 
     def close(self):
         """Close the port manually."""
