@@ -1,7 +1,8 @@
 # pyenttec
-Python module for sending DMX using the Enttec Pro (or compatible) DMX port.
+Python module for sending DMX using the Enttec Pro (or compatible) DMX port.  Supports Python 2 and 3.
 
-Install using setuptools.  I'll get this on PyPI at some point.
+Available on PyPI:
+https://pypi.org/project/pyenttec/
 
 In general, this interface attempts to be as pythonic as possible.  Since rendering
 DMX is a real-time operation, the interface is lightweight and does not attempt
@@ -22,7 +23,7 @@ directly with the right argument.
 
 Support is included for setting various port parameters such as refresh rate
 and universe length.  For certain applications (very fast strobe control,
-for exmaple) using a truncated universe with refresh_rate = 0 permits faster
+for example) using a truncated universe with refresh_rate = 0 permits faster
 control.
 
 This module started as bug fixes to the pySimpleDMX package.
