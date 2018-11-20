@@ -5,7 +5,7 @@ with open('README.md') as f:
 requires = ['pyserial']
 tests_require = ['nose']
 
-setup(
+setuptools.setup(
     name='pyenttec',
     install_requires=requires,
     tests_require=tests_require,
