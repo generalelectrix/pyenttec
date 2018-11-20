@@ -16,4 +16,6 @@ setup(
     license='GPL3',
     description='Control an Enttec Pro DMX from python.',
     long_description=readme,
-    py_modules=['pyenttec'])
+    long_description_content_type='text/markdown',
+    py_modules=['pyenttec'],
+)
