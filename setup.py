@@ -17,5 +17,5 @@ setup(
     description='Control an Enttec Pro DMX from python.',
     long_description=readme,
     long_description_content_type='text/markdown',
-    py_modules=['pyenttec'],
+    packages=setuptools.find_packages(),
 )
