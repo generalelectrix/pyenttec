@@ -2,6 +2,12 @@ from __future__ import print_function
 
 import serial, sys
 import os
+from array import array
+import struct
+
+PY2 = sys.version_info[0] == 2
+if PY2:
+    input = raw_input
 
 _START_VAL = 0x7E
 _END_VAL = 0xE7
@@ -11,7 +17,7 @@ _COM_TIMEOUT = 1
 _MIN_DMX_SIZE = 24
 _MAX_DMX_SIZE = 512
 
-_PACKET_END = chr(_END_VAL)
+_PACKET_END = struct.pack('>B', _END_VAL)
 
 _port_directory = {'darwin': "/dev/",}
 _port_basenames = {'darwin': ["tty.usbserial"],}
@@ -30,10 +36,10 @@ def available_ports():
     customization for your system.
     """
     platform = sys.platform
-    if platform not in _port_basenames.iterkeys():
+    if platform not in _port_basenames:
         raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
                                   "selection only supports {}."
-                                  .format(platform, _port_basenames.keys()))
+                                  .format(platform, list(_port_basenames.keys())))
     return _available_ports(platform)
 
 def _available_ports(platform):
@@ -51,10 +57,10 @@ def select_port(auto=True):
     customization for your system.
     """
     platform = sys.platform
-    if platform not in _port_basenames.iterkeys():
+    if platform not in _port_basenames:
         raise EnttecPortOpenError("Unsupported platform '{}'; automatic port "
                                   "selection only supports {}."
-                                  .format(platform, _port_basenames.keys()))
+                                  .format(platform, list(_port_basenames.keys())))
     print("Available enttec ports:")
     ports = _available_ports(platform)
     for i, port in enumerate(ports):
@@ -62,14 +68,14 @@ def select_port(auto=True):
 
     # select an enttec:
     if len(ports) == 0:
-        selection = raw_input("No enttec ports found; enter y to use a mock: ")
+        selection = input("No enttec ports found; enter y to use a mock: ")
         if selection == 'y':
             return DMXConnectionOffline('offline port')
         raise EnttecPortOpenError("No enttec ports found.")
     elif len(ports) == 1 and auto:
         selection = 0
     else:
-        selection = int(raw_input("Select a port by number:"))
+        selection = int(input("Select a port by number:"))
     try:
         port_name = ports[selection]
     except IndexError:
@@ -96,19 +102,18 @@ class EnttecProParams(object):
 
     def to_packet(self):
         """Format these parameters into a serial packet to send to the port."""
-        payload = [self._user_size_lsb,
+        payload = (self._user_size_lsb,
                    self._user_size_msb,
                    self._break_time,
                    self._mark_after_break_time,
-                   self.refresh_rate]
+                   self.refresh_rate)
         length = len(payload)
-        packet = [_START_VAL,
+        header = (_START_VAL,
                   PortActions.SetParameters,
                   length & 0xFF,
-                  (length >> 8) & 0xFF]
-        packet += payload
-        packet.append(_END_VAL)
-        return ''.join(chr(val) for val in packet)
+                  (length >> 8) & 0xFF)
+        packet = header + payload
+        return array('B', packet).tostring() + _PACKET_END
 
 
 class DMXConnection(object):
@@ -139,7 +144,7 @@ class DMXConnection(object):
                                     .format(univ_size, _MIN_DMX_SIZE))
 
         self._port_params = EnttecProParams()
-        self.dmx_frame = [0] * univ_size
+        self.dmx_frame = array('B', b'\x00' * univ_size)
         self._com_port = com_port
 
         self.com = None
@@ -178,12 +183,12 @@ class DMXConnection(object):
         univ_size = len(self.dmx_frame)
 
         # need to add a pad byte to the serial packet before the DMX payload
-        packet_start = [_START_VAL,
+        packet_start = (_START_VAL,
                         PortActions.SendDMXPacket,
                         (univ_size + 1) & 0xFF,
                         ( (univ_size + 1) >> 8) & 0xFF,
-                        0]
-        self._packet_start = ''.join(chr(v) for v in packet_start)
+                        0)
+        self._packet_start = array('B', packet_start).tostring()
 
         self._write_settings()
 
@@ -194,25 +199,30 @@ class DMXConnection(object):
     def render(self):
         """Write the current DMX frame to the port."""
 
-        dmx_payload = (chr(v) for v in self.dmx_frame)
-
-        self.com.write(self._packet_start + ''.join(dmx_payload) + _PACKET_END)
+        self.com.write(self._packet_start + self.dmx_frame.tostring() + _PACKET_END)
 
     def set_channel(self, chan, val):
         """Set the value of a DMX channel, indexed from 0.
 
-        Raises DMXAddressError for out of bounds address.
+        Raises IndexError for out of bounds address.
+
+        Raises ValueError for out of bounds value.
         """
         try:
             self.dmx_frame[chan] = val
-        except IndexError:
-            raise DMXAddressError("Channel index {} out of range. "
-                                  "Universe size is {}."
-                                  .format(chan, len(self.dmx_frame)))
+        except OverflowError:
+            raise ValueError("Channel value {} out of range. " 
+                             "DMX uses 8bit unsigned values (0-255)." 
+                             .format(val))
+
+    __setitem__ = set_channel
+
+    def __getitem__(self, chan):
+        return self.dmx_frame[chan]
 
     def blackout(self):
         """Zero all DMX values."""
-        self.dmx_frame = [0] * len(self.dmx_frame)
+        self.dmx_frame[:] = array('B', b'\x00' * len(self.dmx_frame))
 
     def close(self):
         """Close the port manually."""
@@ -235,11 +245,11 @@ class DMXConnectionOffline(DMXConnection):
 
 
 # --- Error handling ---
-class EnttecPortOpenError(Exception):
+class EnttecError(Exception):
     pass
 
-class EnttecConfigError(Exception):
+class EnttecPortOpenError(EnttecError):
     pass
 
-class DMXAddressError(Exception):
+class EnttecConfigError(EnttecError):
     pass
