@@ -19,8 +19,8 @@ _MAX_DMX_SIZE = 512
 
 _PACKET_END = struct.pack('>B', _END_VAL)
 
-_port_directory = {'darwin': "/dev/",}
-_port_basenames = {'darwin': ["tty.usbserial"],}
+_port_directory = {'darwin': "/dev/",'linux2':'/dev/'}
+_port_basenames = {'darwin': ["tty.usbserial"],'linux2':["ttyUSB",]}
 
 def _item_is_port(item, platform):
     basenames = _port_basenames[platform]
@@ -53,7 +53,7 @@ def select_port(auto=True):
     If auto=True (default), port is automatically selected if there is only one
     available.
 
-    This function currently only supports Mac OS X and may require further
+    This function currently only supports Mac OS X and Ubuntu and may require further
     customization for your system.
     """
     platform = sys.platform
