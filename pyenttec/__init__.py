@@ -113,7 +113,7 @@ class EnttecProParams(object):
                   length & 0xFF,
                   (length >> 8) & 0xFF)
         packet = header + payload
-        return array('B', packet).tostring() + _PACKET_END
+        return array('B', packet).tobytes() + _PACKET_END
 
 
 class DMXConnection(object):
@@ -188,7 +188,7 @@ class DMXConnection(object):
                         (univ_size + 1) & 0xFF,
                         ( (univ_size + 1) >> 8) & 0xFF,
                         0)
-        self._packet_start = array('B', packet_start).tostring()
+        self._packet_start = array('B', packet_start).tobytes()
 
         self._write_settings()
 
@@ -199,7 +199,7 @@ class DMXConnection(object):
     def render(self):
         """Write the current DMX frame to the port."""
 
-        self.com.write(self._packet_start + self.dmx_frame.tostring() + _PACKET_END)
+        self.com.write(self._packet_start + self.dmx_frame.tobytes() + _PACKET_END)
 
     def set_channel(self, chan, val):
         """Set the value of a DMX channel, indexed from 0.
