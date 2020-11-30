@@ -12,7 +12,7 @@ setuptools.setup(
     test_suite="nose.collector",
     version='1.3',
     author='Chris Macklin',
-    author_email='chris@imaginaryphotons.com',
+    author_email='chris.macklin@gmail.com',
     license='GPL3',
     description='Control an Enttec Pro DMX from python.',
     long_description=readme,
