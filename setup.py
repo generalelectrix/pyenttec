@@ -10,7 +10,7 @@ setuptools.setup(
     install_requires=requires,
     tests_require=tests_require,
     test_suite="nose.collector",
-    version='1.2',
+    version='1.3',
     author='Chris Macklin',
     author_email='chris@imaginaryphotons.com',
     license='GPL3',
