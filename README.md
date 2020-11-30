@@ -1,5 +1,5 @@
 # pyenttec
-Python module for sending DMX using the Enttec Pro (or compatible) DMX port.  Supports Python 2 and 3.
+Python module for sending DMX using the Enttec Pro (or compatible) DMX port.  Supports Python 3 only.
 
 Available on PyPI:
 https://pypi.org/project/pyenttec/

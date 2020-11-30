@@ -1,13 +1,7 @@
-from __future__ import print_function
-
 import serial, sys
 import os
 from array import array
 import struct
-
-PY2 = sys.version_info[0] == 2
-if PY2:
-    input = raw_input
 
 _START_VAL = 0x7E
 _END_VAL = 0xE7
@@ -211,8 +205,8 @@ class DMXConnection(object):
         try:
             self.dmx_frame[chan] = val
         except OverflowError:
-            raise ValueError("Channel value {} out of range. " 
-                             "DMX uses 8bit unsigned values (0-255)." 
+            raise ValueError("Channel value {} out of range. "
+                             "DMX uses 8bit unsigned values (0-255)."
                              .format(val))
 
     __setitem__ = set_channel
