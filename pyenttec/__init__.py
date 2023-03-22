@@ -137,14 +137,29 @@ class DMXConnection(object):
             raise EnttecConfigError("Illegal universe size {}; min is {}."
                                     .format(univ_size, _MIN_DMX_SIZE))
 
+        # need to add a pad byte to the serial packet before the DMX payload
+        packet_start = (_START_VAL,
+                        PortActions.SendDMXPacket,
+                        (univ_size + 1) & 0xFF,
+                        ( (univ_size + 1) >> 8) & 0xFF,
+                        0)
+        packet_start = array('B', packet_start).tobytes()
+
+        a, b, c = len(packet_start), univ_size, len(_PACKET_END)
+
+        self._packet = memoryview(array('B', b'\x00' * (a + b + c)))
+
+        self._packet[:a] = packet_start
+        self.dmx_frame = self._packet[a:a + b]
+        self._packet[a + b:] = _PACKET_END
+
         self._port_params = EnttecProParams()
-        self.dmx_frame = array('B', b'\x00' * univ_size)
         self._com_port = com_port
 
         self.com = None
         self._open_port()
 
-        self._update_params()
+        self._write_settings()
 
     def _open_port(self):
         try:
@@ -172,28 +187,13 @@ class DMXConnection(object):
         self._port_params.refresh_rate = refresh_rate
         self._write_settings()
 
-    def _update_params(self):
-        """Recompute all of the port parameters and update the port settings."""
-        univ_size = len(self.dmx_frame)
-
-        # need to add a pad byte to the serial packet before the DMX payload
-        packet_start = (_START_VAL,
-                        PortActions.SendDMXPacket,
-                        (univ_size + 1) & 0xFF,
-                        ( (univ_size + 1) >> 8) & 0xFF,
-                        0)
-        self._packet_start = array('B', packet_start).tobytes()
-
-        self._write_settings()
-
     def _write_settings(self):
         """Write the current settings to the port."""
         self.com.write(self._port_params.to_packet())
 
     def render(self):
         """Write the current DMX frame to the port."""
-
-        self.com.write(self._packet_start + self.dmx_frame.tobytes() + _PACKET_END)
+        self.com.write(self._packet)
 
     def set_channel(self, chan, val):
         """Set the value of a DMX channel, indexed from 0.
